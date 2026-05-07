@@ -56,6 +56,16 @@ BADGES = [
     ('Premium Pick', '#F3E5F5', '#6A1B9A'),
 ]
 
+# ── Demo examples ─────────────────────────────────────────────
+DEMO_EXAMPLES = {
+    'pos1': "This Kindle is absolutely amazing! The screen is crystal clear and the battery lasts for weeks. Best purchase I ever made, highly recommend!",
+    'pos2': "The Echo is a game changer! Alexa understands everything perfectly and the sound quality is outstanding. Love it in every room of my house!",
+    'neu1': "The Fire Tablet does what it promises but nothing more. Performance is average and the battery life is acceptable. Okay for the price I guess.",
+    'neu2': "These batteries are decent. Not as long lasting as Duracell but cheaper. They work fine for remote controls and basic devices.",
+    'neg1': "Very disappointed with these batteries. They died within a week in my remote control. Expected much better quality from Amazon. Will not buy again.",
+    'neg2': "The Fire TV is a complete waste of money. The interface is confusing, apps crash constantly and Alexa never understands my commands. Returning it tomorrow.",
+}
+
 # ── Custom CSS ───────────────────────────────────────────────
 st.markdown(f"""
 <style>
@@ -147,6 +157,13 @@ st.markdown(f"""
         margin-top: 1rem;
         border: 2px solid;
     }}
+    .demo-box {{
+        background: {C['white']};
+        border-radius: 12px;
+        padding: 1rem 1.2rem;
+        border: 1px solid {C['border']};
+        margin-bottom: 12px;
+    }}
     div[data-testid="stSidebarNav"] {{ display: none; }}
 </style>
 """, unsafe_allow_html=True)
@@ -234,6 +251,12 @@ def colorize_article(text: str) -> str:
             s = f'<span style="color:{C["text"]}">{s}</span>'
         colored.append(s)
     return '<br>'.join(colored)
+
+# ── Session state init ────────────────────────────────────────
+if 'demo_text' not in st.session_state:
+    st.session_state.demo_text = ''
+if 'new_reviews' not in st.session_state:
+    st.session_state.new_reviews = []
 
 # ── Sidebar ───────────────────────────────────────────────────
 with st.sidebar:
@@ -385,12 +408,42 @@ elif page == "🏆 Top Products":
 # ══════════════════════════════════════════════════════════════
 elif page == "📂 Classify Review":
     st.title("Live Review Classifier")
-    st.markdown("Type a product review — our fine-tuned BERT model classifies its sentiment in real time.")
+    st.markdown("Type a review or pick a demo example — our fine-tuned BERT model classifies its sentiment in real time.")
     st.markdown("---")
 
-    review_input = st.text_area("Enter a product review",
+    # ── Demo examples ────────────────────────────────────────
+    st.markdown("**Try a demo example:**")
+    col_pos, col_neu, col_neg = st.columns(3)
+
+    with col_pos:
+        st.markdown(f"<div style='color:{C['positive']};font-weight:600;margin-bottom:6px'>✅ Positive</div>", unsafe_allow_html=True)
+        if st.button("Kindle review", key="pos1"):
+            st.session_state.demo_text = DEMO_EXAMPLES['pos1']
+        if st.button("Echo review", key="pos2"):
+            st.session_state.demo_text = DEMO_EXAMPLES['pos2']
+
+    with col_neu:
+        st.markdown(f"<div style='color:{C['neutral']};font-weight:600;margin-bottom:6px'>➖ Neutral</div>", unsafe_allow_html=True)
+        if st.button("Fire Tablet review", key="neu1"):
+            st.session_state.demo_text = DEMO_EXAMPLES['neu1']
+        if st.button("Batteries review", key="neu2"):
+            st.session_state.demo_text = DEMO_EXAMPLES['neu2']
+
+    with col_neg:
+        st.markdown(f"<div style='color:{C['negative']};font-weight:600;margin-bottom:6px'>❌ Negative</div>", unsafe_allow_html=True)
+        if st.button("Batteries negative", key="neg1"):
+            st.session_state.demo_text = DEMO_EXAMPLES['neg1']
+        if st.button("Fire TV negative", key="neg2"):
+            st.session_state.demo_text = DEMO_EXAMPLES['neg2']
+
+    st.markdown("<br>", unsafe_allow_html=True)
+
+    review_input = st.text_area(
+        "Or type your own review",
+        value=st.session_state.demo_text,
         placeholder="e.g. This Kindle is absolutely amazing, best purchase I ever made!",
-        height=130)
+        height=130
+    )
 
     if st.button("Analyze Review", type="primary"):
         if review_input.strip():
@@ -434,7 +487,7 @@ elif page == "📂 Classify Review":
                 except Exception as e:
                     st.error(f"Model error: {e}")
         else:
-            st.warning("Please enter a review first.")
+            st.warning("Please enter a review or pick a demo example first.")
 
     st.markdown("---")
     st.subheader("Model Performance")
@@ -464,9 +517,6 @@ elif page == "📝 Add Review":
     st.title("Add Your Review")
     st.markdown("Submit a product review — it will be automatically classified by BERT and added live.")
     st.markdown("---")
-
-    if 'new_reviews' not in st.session_state:
-        st.session_state.new_reviews = []
 
     col_form, col_recent = st.columns(2)
 
