@@ -30,6 +30,7 @@ project/
 ├── app.py                          # Streamlit web app
 ├── requirements.txt
 ├── README.md
+├── blog_articles.csv (summarized clustered product, our endproduct)
 ├── notebooks/
 │   ├── 01_data_preprocessing.ipynb
 │   ├── 02_review_classification_base.ipynb
