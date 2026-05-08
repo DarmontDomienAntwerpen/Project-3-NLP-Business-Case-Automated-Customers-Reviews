@@ -31,6 +31,7 @@ project/
 ├── requirements.txt
 ├── README.md
 ├── blog_articles.csv (summarized clustered product, our endproduct)
+├── EXTRA projectstats (summarizes the total project)
 ├── notebooks/
 │   ├── 01_data_preprocessing.ipynb
 │   ├── 02_review_classification_base.ipynb
